@@ -19,7 +19,7 @@ export const myWorker = new Worker(
   async (job) => {
     try {
       ChainId.map(async(e)=>{
-      //  await updateGlobalData(e)
+       await updateGlobalData(e)
       })
     } catch (erros) {
       console.log("error in myWorker", erros);
@@ -33,7 +33,7 @@ export const PriceWorker = new Worker(
   async (job) => {
     try {
       ChainId.map(async(e)=>{
-     // await fetchAndupdateHexprice(e)
+     await fetchAndupdateHexprice(e)
       })
     } catch (erros) {
       console.log("error in myWorker", erros);
@@ -46,10 +46,9 @@ export const HexDaydataworker: any = new Worker(
   "HexDaydata",
   async (job) => {
     try {
-      console.log("annoncement");
-      
+  
       ChainId.map(async(e)=>{
-       // await fetchAndupdatedDaydata(e)
+       await fetchAndupdatedDaydata(e)
       })
     } catch (erros) {
       console.log("error in myWorker", erros);
