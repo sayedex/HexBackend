@@ -3,7 +3,9 @@ import { fetchTokenData, fetchHexMarketChart } from "../helper/hexprice";
 import { fetchShareRateData } from "../helper/shareRate";
 import globalschema from "../Models/GlobalInfo";
 import { DataResults } from "../helper/globaldata";
-import { fetchDaydataData } from "../helper/daydata";
+import { TokendaydataClient } from "./dataClient";
+import { Tokenaddress } from "../config/index";
+
 interface TshareData {
   date: number;
   hexday: number;
@@ -22,15 +24,27 @@ interface FetchAndUpdateResult {
 }
 
 export const fetchAndupdateGlobaldata = async (
-  lastSync: number
+  lastSync: number,
+  id: number
 ): Promise<FetchAndUpdateResult> => {
   const url = process.env.Eglobalgraph || "";
 
   try {
     const GlobalData: any = await fetchGlobalData(url, lastSync);
+    let Pricedatadata;
 
-    const data = await fetchHexMarketChart();
-    const filter = { _id: "655e120ac4c518c7da0cc355" };
+    if (id === 1) {
+      const fetchdata = await fetchHexMarketChart();
+      Pricedatadata = fetchdata.map((e: any) => ({
+        timestamp: e[0] / 1000,
+        price: e[1],
+      }));
+    } else {
+      const price = await fetchTokenData(Tokenaddress, TokendaydataClient[id]);
+      Pricedatadata = price.data;
+    }
+
+    const filter = { id: id };
 
     /// graph data
     const globaldata = GlobalData.data;
@@ -41,6 +55,13 @@ export const fetchAndupdateGlobaldata = async (
           globaldata: { $each: globaldata },
         },
       };
+      // this is needed if we resync from 0
+      // const update = {
+      //   $set: {
+      //     globaldata: globaldata,
+      //   },
+      // };
+
       const options = { new: true };
       const updatedDocument = await globalschema.findOneAndUpdate(
         filter,
@@ -49,7 +70,7 @@ export const fetchAndupdateGlobaldata = async (
       );
     }
 
-    const AfterUpdate = await globalschema.findById("655e120ac4c518c7da0cc355");
+    const AfterUpdate = await globalschema.findOne({ id });
 
     let uniqueData: Record<number, DataResults["globalInfos"][0]> = {};
     for (let i = 0; i < AfterUpdate.globaldata.length; i++) {
@@ -63,13 +84,13 @@ export const fetchAndupdateGlobaldata = async (
 
     const lastSyncIDstored = GlobalData.lastSyncID;
 
-    const Tshare: Array<TshareData> = data.map((e: any) => {
-      const [timestamp, value] = e;
-      const i = Math.ceil(timestamp / 1000 / 86400 - 18233);
+    const Tshare: Array<TshareData> = Pricedatadata.map((e: any) => {
+      const { timestamp, price } = e;
+      const i = Math.ceil(timestamp / 86400 - 18233);
       const shareRate = Number(uniqueData[i]?.shareRate || 0);
       const tshareprice = isNaN(shareRate)
         ? 0
-        : (Number(value) * shareRate) / 10;
+        : (Number(price) * shareRate) / 10;
       return { timestamp: timestamp, hexday: i, tshare: tshareprice };
     });
 
@@ -83,66 +104,5 @@ export const fetchAndupdateGlobaldata = async (
     console.error("An error occurred:", error);
     // You might want to throw the error if you want to propagate it
     throw error;
-  }
-};
-
-/// Hex price update worker
-export const fetchAndupdateHexprice = async (id: string) => {
-  const filter = { _id: id };
-  const options = { new: true };
-
-  const data = await fetchHexMarketChart();
-
-  const price = data.map((e: any) => {
-    const [timestamp, price] = e;
-    return {
-      timestamp: timestamp,
-      price: price,
-    };
-  });
-
-  const update = {
-    $set: {
-      pricedata: price,
-    },
-  };
-
-  if (price.length > 0) {
-    const updatedDocument = await globalschema.findOneAndUpdate(
-      filter,
-      update,
-      options
-    );
-
-    return { isdone: true };
-  } else {
-    return { isdone: false };
-  }
-};
-
-
-export const fetchAndupdatedDaydata = async (id: string) => {
-  const filter = { _id: id };
-  const options = { new: true };
-
-  const data = await fetchDaydataData("https://api.thegraph.com/subgraphs/name/codeakk/hex");
-
-
-  const update = {
-    $set: {
-      daydata: data.data,
-    },
-  };
-
-  if (data.data.length > 0) {
-    const updatedDocument = await globalschema.findOneAndUpdate(
-      filter,
-      update,
-      options
-    );
-
-    return { isdone: true };
-  } else {
-    return { isdone: false };
   }
 };

@@ -21,6 +21,10 @@ const GLOBAL_INFO = gql`
       hexDay
       latestStakeId
       globalInfoCount
+      stakePenaltyTotal
+      stakeSharesTotal
+      totalMintedHearts
+      lockedHeartsTotal
     }
   }
 `;
@@ -31,6 +35,11 @@ export interface DataResults {
     shareRate: string;
     latestStakeId: string;
     hexDay: number;
+    stakePenaltyTotal:number;
+    stakeSharesTotal:number;
+    totalMintedHearts:number;
+    lockedHeartsTotal:number
+
   }[];
 }
 

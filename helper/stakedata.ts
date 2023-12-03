@@ -2,40 +2,40 @@ import { Request, Response } from "express";
 import { request, gql } from "graphql-request";
 
 const STAKE_INFO = gql`
-  query Stakeinfo($stakerAddr:Bytes!) {
+  query Stakeinfo($stakerAddr: Bytes!) {
     stakeStarts: stakeStarts(
-      first: 1
+      first: 100
       orderBy: timestamp
       orderDirection: asc
       subgraphError: allow
       where: { stakerAddr: $stakerAddr }
     ) {
-    stakeId
-    stakeShares
-    stakeTShares
-    stakedDays
-    stakedHearts
-    stakerAddr
-    startDay
-    timestamp
-    endDay
+      stakeId
+      stakeShares
+      stakeTShares
+      stakedDays
+      stakedHearts
+      stakerAddr
+      startDay
+      timestamp
+      endDay
     }
-    stakeEnds:stakeEnds(
-      first: 1
+    stakeEnds: stakeEnds(
+      first: 100
       orderBy: timestamp
-      orderDirection: desc
+      orderDirection: asc
       subgraphError: allow
       where: { stakerAddr: $stakerAddr }
     ) {
-    penalty
-    payout
-    prevUnlocked
-    servedDays
-    stakeId
-    stakedHearts
-    stakedShares
-    stakerAddr
-    timestamp
+      penalty
+      payout
+      prevUnlocked
+      servedDays
+      stakeId
+      stakedHearts
+      stakedShares
+      stakerAddr
+      timestamp
     }
   }
 `;
@@ -79,12 +79,10 @@ export async function fetchStakedata(stakerAddr: string, client: string) {
     let skip = 0;
 
     const variables = {
-        stakerAddr,
+      stakerAddr,
     };
 
-
     console.log(variables);
-    
 
     const StakeResData = await request<Stakeinfo>(
       client,
@@ -92,21 +90,19 @@ export async function fetchStakedata(stakerAddr: string, client: string) {
       variables
     );
 
-     const { stakeStarts, stakeEnds } = StakeResData;
-     return {
-        stakeStarts:stakeStarts,
-        stakeEnds:stakeEnds,
-        error: false,
-        errorText:[]
-      };
-
-
-  } catch (error){
+    const { stakeStarts, stakeEnds } = StakeResData;
     return {
-        stakeStarts:[],
-        stakeEnds:[],
-        error: true,
-        errorText:error
-      };
+      stakeStarts: stakeStarts,
+      stakeEnds: stakeEnds,
+      error: false,
+      errorText: [],
+    };
+  } catch (error) {
+    return {
+      stakeStarts: [],
+      stakeEnds: [],
+      error: true,
+      errorText: error,
+    };
   }
 }

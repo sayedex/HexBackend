@@ -24,7 +24,12 @@ const globaldataSchema = new Schema({
   shareRate: { type: String, required: true },
   latestStakeId: { type: String, required: true },
   hexDay: { type: Number, required: true },
+  stakePenaltyTotal: { type: Number, required: true },
+  stakeSharesTotal: { type: Number, required: true },
+  totalMintedHearts: { type: Number, required: true },
+  lockedHeartsTotal: { type: Number, required: true },
 });
+
 
 // Define the schema for the nested data
 const Hexprice = new Schema({
@@ -52,7 +57,10 @@ const Globaldata:any = new Schema({
     type: Number,
     required: true,
   },
-  TshareDataETH: [TshareDataSchema],
+  TshareDataETH: {
+    type:[TshareDataSchema],
+    required: false
+  },
   LastupdateidETH:{
     type: Number,
     required: true,

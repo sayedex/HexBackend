@@ -48,37 +48,40 @@ export async function fetchTokenData(address: string, client: string) {
       address,
     };
 
-    const chartResData = await request<ChartResults>(client, TOKEN_CHART, variables);
+    const chartResData = await request<ChartResults>(
+      client,
+      TOKEN_CHART,
+      variables
+    );
 
     if (chartResData && chartResData.tokenDayDatas.length > 0) {
       data = data.concat(chartResData.tokenDayDatas);
       skip += chartResData.tokenDayDatas.length;
       console.log(`Skip: ${skip}`);
       console.log(`Data Length: ${data.length}`);
-
     } else {
       break; // No more data to fetch
     }
   } while (true);
 
   console.log(data.length);
-  
 
   if (data.length > 0) {
     const formattedExisting: { [date: number]: any } = data.reduce(
-      (accum:any, dayData) => {
+      (accum: any, dayData) => {
         const roundedDate = parseInt((dayData.date / ONE_DAY_UNIX).toFixed(0));
 
         accum[roundedDate] = {
-          date: dayData.date,
-          priceUSD: parseFloat(dayData.priceUSD),
+          timestamp: dayData.date,
+          price: parseFloat(dayData.priceUSD),
         };
         return accum;
       },
       {}
     );
 
-    const firstEntry = formattedExisting[parseInt(Object.keys(formattedExisting)[0])];
+    const firstEntry =
+      formattedExisting[parseInt(Object.keys(formattedExisting)[0])];
 
     // fill in empty days (there will be no day datas if no trades made that day)
     let timestamp = firstEntry?.date ?? endTimestamp;
@@ -87,25 +90,26 @@ export async function fetchTokenData(address: string, client: string) {
     while (timestamp < endTimestamp) {
       const nextDay = timestamp + ONE_DAY_UNIX;
       const currentDayIndex = parseInt((nextDay / ONE_DAY_UNIX).toFixed(0));
-      if (!Object.keys(formattedExisting).includes(currentDayIndex.toString())) {
+      if (
+        !Object.keys(formattedExisting).includes(currentDayIndex.toString())
+      ) {
         formattedExisting[currentDayIndex] = {
-          date: nextDay,
-          priceUSD: latestPrice,
+          timestamp: nextDay,
+          price: latestPrice,
         };
       } else {
-     
-        latestPrice = formattedExisting[currentDayIndex].priceUSD; // Update latestPrice
+        latestPrice = formattedExisting[currentDayIndex].price; // Update latestPrice
       }
       timestamp = nextDay;
     }
 
-    const dateMap = Object.keys(formattedExisting).map((key) => formattedExisting[parseInt(key)]);
-        // Filter out entries where priceUSD is 0
-        const filteredData = Object.keys(formattedExisting)
-        .map((key) => formattedExisting[parseInt(key)])
-        .filter((entry) => entry.priceUSD !== 0);
-
-        
+    const dateMap = Object.keys(formattedExisting).map(
+      (key) => formattedExisting[parseInt(key)]
+    );
+    // Filter out entries where priceUSD is 0
+    const filteredData = Object.keys(formattedExisting)
+      .map((key) => formattedExisting[parseInt(key)])
+      .filter((entry) => entry.price !== 0);
 
     return {
       data: filteredData,

@@ -1,39 +1,26 @@
 import IORedis from "ioredis";
+import { ChainId } from "../config";
 import { Queue, Worker } from "bullmq";
 const connection = new IORedis();
 const ThshareQueue = new Queue("UpdateTshare");
 const HexpriceQueue = new Queue("HexpriceQueue");
-const HexDaydata  = new Queue("HexDaydata");
+const HexDaydata = new Queue("HexDaydata");
+
+
 //helper func
-import { fetchAndupdateGlobaldata,fetchAndupdateHexprice,fetchAndupdatedDaydata } from "../utils/Updater";
+import {updateGlobalData} from "../utils/Updater/updateGlobalData";
+import {fetchAndupdateHexprice} from "../utils/Updater/Priceupdater";
+import {fetchAndupdatedDaydata} from "../utils/Updater/Daydataupdater";
+import {updateStakersdata} from "../utils/Updater/Stakersdata"
 import globalschema from "../Models/GlobalInfo";
 
 export const myWorker = new Worker(
   "UpdateTshare",
   async (job) => {
-    console.log("hii");
-    
     try {
-      console.log("working");
-      const lastSync = await globalschema.findById("655e120ac4c518c7da0cc355");
-    
-     
-      if (lastSync) {
-      const lastSyncdocument = await lastSync.LastupdateidETH;
-
-      const { Tshare, lastSyncIDstored } = await fetchAndupdateGlobaldata(
-        lastSyncdocument
-      );
-
-       if(Tshare.length > 0 && lastSyncIDstored !=0){
-        lastSync.LastupdateidETH = lastSync.LastupdateidETH + lastSyncIDstored ; 
-        lastSync.TshareDataETH = Tshare; 
-        await lastSync.save();
-
-       }
-
-     console.log("done ...")
-      }
+      ChainId.map(async(e)=>{
+      //  await updateGlobalData(e)
+      })
     } catch (erros) {
       console.log("error in myWorker", erros);
     }
@@ -44,17 +31,10 @@ export const myWorker = new Worker(
 export const PriceWorker = new Worker(
   "HexpriceQueue",
   async (job) => {
-    console.log("hii from hex");
-    
     try {
-      console.log("working hex ");
-
-     const pricedata  = await fetchAndupdateHexprice("655e120ac4c518c7da0cc355");
-
-    console.log(pricedata);
-      
-  
-
+      ChainId.map(async(e)=>{
+     // await fetchAndupdateHexprice(e)
+      })
     } catch (erros) {
       console.log("error in myWorker", erros);
     }
@@ -62,22 +42,15 @@ export const PriceWorker = new Worker(
   { connection }
 );
 
-
-
-export const HexDaydataworker:any = new Worker(
+export const HexDaydataworker: any = new Worker(
   "HexDaydata",
   async (job) => {
-    console.log("hii from hex");
-    
     try {
-      console.log("working hex ");
-
-     const pricedata  = await fetchAndupdatedDaydata("655e120ac4c518c7da0cc355");
-
-    console.log(pricedata);
+      console.log("annoncement");
       
-  
-
+      ChainId.map(async(e)=>{
+       // await fetchAndupdatedDaydata(e)
+      })
     } catch (erros) {
       console.log("error in myWorker", erros);
     }
@@ -87,19 +60,26 @@ export const HexDaydataworker:any = new Worker(
 
 
 
-export const UpdateTsharechart = async () => {
 
+
+//query client 
+// pattern: '*/1 * * * *',
+// limit:1
+//0 */10 * * *
+
+export const UpdateTsharechart = async () => {
   await HexDaydata.add(
     "HexDaydata",
     { color: "bird" },
     {
       repeat: {
         every: 1000,
-        limit: 2,
+        limit:1
+      
       },
+    
     }
   );
-
 
   await ThshareQueue.add(
     "UpdateTshare",
@@ -107,7 +87,7 @@ export const UpdateTsharechart = async () => {
     {
       repeat: {
         every: 1000,
-        limit: 2,
+        limit: 1,
       },
     }
   );
@@ -118,9 +98,8 @@ export const UpdateTsharechart = async () => {
     {
       repeat: {
         every: 1000,
-        limit: 2,
+        limit: 1,
       },
     }
   );
-
 };
