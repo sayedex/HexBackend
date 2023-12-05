@@ -47,16 +47,26 @@ export const getTest = catchAsyncErrors(
 
   newGlobaldata1.save()
 
-    // const initialData = {
-    //   name: "pluseX",
-    //   id: 109, // Example ID
-    //   Lastsyncupdated: 0, // Initial value for Lastsyncupdated
-    //   Stakers: [], // Empty array for Stakers
-    //   uniqueStakerAddresses: 0, // Initial value for uniqueStakerAddresses
-    // };
+     const initialData = {
+      name: "pluseX",
+     id: 109, // Example ID
+       Lastsyncupdated: 0, // Initial value for Lastsyncupdated
+      Stakers: [], // Empty array for Stakers
+      uniqueStakerAddresses: 0, // Initial value for uniqueStakerAddresses
+     };
 
-    // // Upsert (update or insert) the Stakersinfo document
-    // await Stakersinfo.updateOne({ id: 109 }, initialData, { upsert: true });
+    //// Upsert (update or insert) the Stakersinfo document
+   await Stakersinfo.updateOne({ id: 109 }, initialData, { upsert: true });
+   const initialDataA = {
+    name: "eth",
+   id: 1, // Example ID
+     Lastsyncupdated: 0, // Initial value for Lastsyncupdated
+    Stakers: [], // Empty array for Stakers
+    uniqueStakerAddresses: 0, // Initial value for uniqueStakerAddresses
+   };
+
+  //// Upsert (update or insert) the Stakersinfo document
+ await Stakersinfo.updateOne({ id: 1 }, initialDataA, { upsert: true });
 
     // const GlobalData = await fetchGlobalData("https://graph.pulsechain.com/subgraphs/name/Codeakk/Hex",0)
 

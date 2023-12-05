@@ -5,13 +5,14 @@ const connection = new IORedis();
 const ThshareQueue = new Queue("UpdateTshare");
 const HexpriceQueue = new Queue("HexpriceQueue");
 const HexDaydata = new Queue("HexDaydata");
-
+const updateALLStakers = new Queue("updateALLStakers");
 
 //helper func
 import {updateGlobalData} from "../utils/Updater/updateGlobalData";
 import {fetchAndupdateHexprice} from "../utils/Updater/Priceupdater";
 import {fetchAndupdatedDaydata} from "../utils/Updater/Daydataupdater";
 import {updateStakersdata} from "../utils/Updater/Stakersdata"
+
 import globalschema from "../Models/GlobalInfo";
 
 export const myWorker = new Worker(
@@ -57,6 +58,20 @@ export const HexDaydataworker: any = new Worker(
   { connection }
 );
 
+export const updateALLStakersWorker: any = new Worker(
+  "updateALLStakers",
+  async (job) => {
+    try {
+  
+      ChainId.map(async(e)=>{
+       await updateStakersdata(e)
+      })
+    } catch (erros) {
+      console.log("error in myWorker", erros);
+    }
+  },
+  { connection }
+);
 
 
 
@@ -93,6 +108,16 @@ export const UpdateTsharechart = async () => {
 
   await HexpriceQueue.add(
     "HexpriceQueue",
+    { color: "bird" },
+    {
+      repeat: {
+        every: 1000,
+        limit: 1,
+      },
+    }
+  );
+  await updateALLStakers.add(
+    "updateALLStakers",
     { color: "bird" },
     {
       repeat: {

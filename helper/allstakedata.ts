@@ -39,7 +39,7 @@ interface DataResults {
 
 export async function fetchALLStakedata(id: number, lastSync: number) {
   try {
-    const maxRetries = 5;
+    const maxRetries = 100;
     let retries = 0;
     let data: DataResults["stakeStarts"] = [];
     let skip = lastSync;
@@ -47,6 +47,7 @@ export async function fetchALLStakedata(id: number, lastSync: number) {
 
     const batchSize = 1000;
     const delayBetweenBatches = 10; // 2 seconds
+    let totalRecords = 0;
 
     const fetchDataBatchWithRetry = async () => {
       let retries = 0;
@@ -66,13 +67,14 @@ export async function fetchALLStakedata(id: number, lastSync: number) {
 
           if (
             stakedata &&
-            stakedata.stakeStarts.length > 0 &&
-            data.length < 2000
+            stakedata.stakeStarts.length > 0 && totalRecords < 20000
           ) {
        
 
             data = data.concat(stakedata.stakeStarts);
             skip += stakedata.stakeStarts.length;
+            totalRecords += stakedata.stakeStarts.length;
+
             console.log(`Skip: ${skip}`);
             console.log(`Data Length: ${data.length}`);
           } else {
@@ -86,7 +88,7 @@ export async function fetchALLStakedata(id: number, lastSync: number) {
           if (retries <= maxRetries) {
             console.log(`Retry attempt ${retries}`);
             // Introduce a delay before the next retry (e.g., wait for 1 second)
-            await new Promise((resolve) => setTimeout(resolve, 2000));
+            await new Promise((resolve) => setTimeout(resolve, 10000));
           } else {
             console.error("Max retries reached. Exiting.");
             return false;

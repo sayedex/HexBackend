@@ -58,7 +58,7 @@ app.listen(5000, async () => {
     if(e.isdone){
       console.log("connet to db");
       
-     UpdateTsharechart();
+   //  UpdateTsharechart();
     }
 
  })
