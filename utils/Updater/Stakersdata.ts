@@ -1,47 +1,67 @@
 import { fetchAndupdateGlobaldata } from "../../utils/Updater";
-import Stakersinfo from "../../Models/Stakersinfo";
+import { getChainModel } from "../../Models/Chain";
 import { fetchALLStakedata } from "../../helper/allstakedata";
+const NUM_UPDATES_PER_CHAIN = 1; // Set the desired number of updates per ChainId
+
 export const updateStakersdata = async (id: number) => {
   console.log("working id updateStakersdata", id);
-  const lastSync = await Stakersinfo.findOne({ id: id });
+  for (
+    let updateCount = 0;
+    updateCount < NUM_UPDATES_PER_CHAIN;
+    updateCount++
+  ) {
+    const bulkOps: any = [];
+    const chainModel = getChainModel(id);
+    const lastSync = await chainModel.findOne({ id: id });
 
-  if (lastSync) {
-    const lastSyncdocument = await lastSync.Lastsyncupdated;
+    if (lastSync) {
+      const lastSyncdocument = await lastSync.Lastsyncupdated;
 
-    const { lastSyncID, data } = await fetchALLStakedata(id, lastSyncdocument);
+      const { lastSyncID, data } = await fetchALLStakedata(
+        id,
+        lastSyncdocument
+      );
 
-    if (data && data.length > 0 && lastSyncID != 0) {
-      try {
+      if (data && data.length > 0 && lastSyncID !== 0) {
+        try {
+          const uniqueData = removeDuplicates(data, "stakerAddr");
 
-        // Update or insert staker data in bulk
-        await Stakersinfo.updateOne(
-          { id: id },
-          {
-            $push: { Stakers: { $each: data } },
-            $inc: { Lastsyncupdated: lastSyncID  },
-          },
-          { upsert: true }
-        );
+          const existingStakerAddresses = new Set(
+            lastSync.stakers.map((staker: any) => staker.stakerAddr)
+          );
 
-        console.log("Bulk update or insert completed for id", id);
+          const stakersToPush: any = uniqueData.filter(
+            (staker) => !existingStakerAddresses.has(staker.stakerAddr)
+          );
+          if (stakersToPush.length > 0) {
+            bulkOps.push({
+              updateOne: {
+                filter: { id: id },
+                update: {
+                  $push: { stakers: { $each: stakersToPush } },
+                  $inc: { Lastsyncupdated: lastSyncID },
+                },
+                upsert: true,
+              },
+            });
 
-        const staker = await Stakersinfo.findOne({ id: id });
-        // get all new
-        const stakerData = staker.Stakers;
+            await chainModel.bulkWrite(bulkOps);
+          }
 
-        const uniqueAddresses = new Set(
-          stakerData.map((staker: any) => staker.stakerAddr)
-        );
-        // Convert the set to an array
-        const uniqueAddressesArray = Array.from(uniqueAddresses);
-        // Get the count of unique addresses
-        const uniqueAddressesCount = uniqueAddressesArray.length;
-        staker.uniqueStakerAddresses = uniqueAddressesCount;
-        await staker.save();
-      } catch (error) {
-        console.log(error);
+          console.log("Bulk update or insert completed for id", id);
+        } catch (error) {
+          console.log(error);
+        }
       }
+      console.log("done...", id);
     }
-    console.log("done...", id);
   }
 };
+
+function removeDuplicates<T>(array: T[], key: keyof T): T[] {
+  return array.filter(
+    (item, index, self) =>
+      index ===
+      self.findIndex((i) => (i[key] as unknown) === (item[key] as unknown))
+  );
+}

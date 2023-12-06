@@ -10,30 +10,24 @@ const ALL_STAKE_INFO = gql`
       orderDirection: asc
       subgraphError: allow
     ) {
-      stakeId
-      stakeShares
-      stakeTShares
-      stakedDays
-      stakedHearts
+
       stakerAddr
-      startDay
-      timestamp
-      endDay
+  
     }
   }
 `;
 
 interface DataResults {
   stakeStarts: {
-    stakeId: number;
-    stakeShares: number;
-    stakeTShares: number;
-    stakedDays: number;
-    stakedHearts: number;
+    // stakeId: number;
+    // stakeShares: number;
+    // stakeTShares: number;
+    // stakedDays: number;
+    // stakedHearts: number;
     stakerAddr: string;
-    startDay: number;
-    timestamp: number;
-    endDay: number;
+    // startDay: number;
+    // timestamp: number;
+    // endDay: number;
   }[];
 }
 
@@ -67,7 +61,7 @@ export async function fetchALLStakedata(id: number, lastSync: number) {
 
           if (
             stakedata &&
-            stakedata.stakeStarts.length > 0 && totalRecords < 20000
+            stakedata.stakeStarts.length > 0 && totalRecords < 50000
           ) {
        
 

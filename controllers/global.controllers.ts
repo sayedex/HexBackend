@@ -5,9 +5,9 @@ import { fetchGlobalData } from "../helper/globaldata";
 import { fetchTokenData, fetchHexMarketChart } from "../helper/hexprice";
 import { fetchShareRateData } from "../helper/shareRate";
 import globalschema from "../Models/GlobalInfo";
-import Stakersinfo from "../Models/Stakersinfo";
 import { DataResults } from "../helper/daydata";
 import {fetchStakeAmount} from "../helper/payout"
+import { getChainModel } from "../Models/Chain";
 import IORedis from "ioredis";
 const RedisClient = new IORedis();
 
@@ -21,52 +21,63 @@ export const getTest = catchAsyncErrors(
     //    "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3"
     //   );
 
+    
     // const data = await updateStakersdata(109);
 
-     const newGlobaldata = new globalschema({
-         name: "eth",
-         id: 1, // Example ID
-         LastupdateidETH: 0, // Initial value for Lastsyncupdated
-         globaldata: [], // Empty array for Stakers
-         pricedata: [], // Initial value for un
-         daydata:[]
+  //    const newGlobaldata = new globalschema({
+  //        name: "eth",
+  //        id: 1, // Example ID
+  //        LastupdateidETH: 0, // Initial value for Lastsyncupdated
+  //        globaldata: [], // Empty array for Stakers
+  //        pricedata: [], // Initial value for un
+  //        daydata:[]
 
-     });
+  //    });
 
-    newGlobaldata.save()
+  //   newGlobaldata.save()
 
-    const newGlobaldata1 = new globalschema({
-      name: "pls",
-      id: 109, // Example ID
-      LastupdateidETH: 0, // Initial value for Lastsyncupdated
-      globaldata: [], // Empty array for Stakers
-      pricedata: [], // Initial value for un
-      daydata:[]
+  //   const newGlobaldata1 = new globalschema({
+  //     name: "pls",
+  //     id: 109, // Example ID
+  //     LastupdateidETH: 0, // Initial value for Lastsyncupdated
+  //     globaldata: [], // Empty array for Stakers
+  //     pricedata: [], // Initial value for un
+  //     daydata:[]
 
-  });
+  // });
 
-  newGlobaldata1.save()
+  // newGlobaldata1.save()
 
-     const initialData = {
-      name: "pluseX",
-     id: 109, // Example ID
-       Lastsyncupdated: 0, // Initial value for Lastsyncupdated
-      Stakers: [], // Empty array for Stakers
-      uniqueStakerAddresses: 0, // Initial value for uniqueStakerAddresses
-     };
+//      const initialData = {
+//       name: "pluseX",
+//      id: 109, // Example ID
+//        Lastsyncupdated: 0, // Initial value for Lastsyncupdated
+//       Stakers: [], // Empty array for Stakers
+//      };
 
-    //// Upsert (update or insert) the Stakersinfo document
-   await Stakersinfo.updateOne({ id: 109 }, initialData, { upsert: true });
-   const initialDataA = {
-    name: "eth",
-   id: 1, // Example ID
-     Lastsyncupdated: 0, // Initial value for Lastsyncupdated
-    Stakers: [], // Empty array for Stakers
-    uniqueStakerAddresses: 0, // Initial value for uniqueStakerAddresses
-   };
+//     //// Upsert (update or insert) the Stakersinfo document
+//    await Stakersinfo.updateOne({ id: 109 }, initialData, { upsert: true });
+//    const initialDataA = {
+//     name: "eth",
+//    id: 1, // Example ID
+//      Lastsyncupdated: 0, // Initial value for Lastsyncupdated
+//     Stakers: [], // Empty array for Stakers
+//    };
 
-  //// Upsert (update or insert) the Stakersinfo document
- await Stakersinfo.updateOne({ id: 1 }, initialDataA, { upsert: true });
+//   //// Upsert (update or insert) the Stakersinfo document
+//  await Stakersinfo.updateOne({ id: 1 }, initialDataA, { upsert: true });
+
+
+// const chainModel = getChainModel(109);
+
+// // Find or create an empty Chain document for the given chain ID
+// const lastSync = await chainModel.findOneAndUpdate(
+//   { id: 109},
+//   { $setOnInsert: { id: 109, stakers: [], Lastsyncupdated: 0 } },
+//   { upsert: true, new: true }
+// );
+
+
 
     // const GlobalData = await fetchGlobalData("https://graph.pulsechain.com/subgraphs/name/Codeakk/Hex",0)
 
@@ -228,11 +239,15 @@ export const Totalstekrs = catchAsyncErrors(
         data: { totalstakers: JSON.parse(CachedCheck) },
       });
     } else {
-      const data = await Stakersinfo.findOne({ id });
+      const chainModel = getChainModel(109);
+  
+      const chainDocument = await chainModel.findOne({ id });
+      const stakersCount = chainDocument.stakers.length;
+
 
       RedisClient.set(
         `Totalstekrs:${id}`,
-        JSON.stringify(data.uniqueStakerAddresses),
+        JSON.stringify(stakersCount),
         "EX",
         60
       );
@@ -240,7 +255,7 @@ export const Totalstekrs = catchAsyncErrors(
       res.status(200).json({
         success: true,
         message: "Data retrieved successfully from API",
-        data: { totalstakers: data.uniqueStakerAddresses },
+        data: { totalstakers: stakersCount },
       });
     }
   }
