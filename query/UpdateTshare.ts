@@ -87,8 +87,7 @@ export const UpdateTsharechart = async () => {
     { color: "bird" },
     {
       repeat: {
-        pattern: "0 */6 * * *",
-        limit:1
+        pattern: "0 */6 * * *"
       
       },
     
@@ -100,8 +99,7 @@ export const UpdateTsharechart = async () => {
     { color: "bird" },
     {
       repeat: {
-        pattern: "0 */6 * * *",
-        limit: 1,
+        pattern: "0 */6 * * *"
       },
     }
   );
@@ -112,7 +110,6 @@ export const UpdateTsharechart = async () => {
     {
       repeat: {
         pattern: "*/30 * * * *",
-        limit: 1,
       },
     }
   );
@@ -122,7 +119,6 @@ export const UpdateTsharechart = async () => {
     {
       repeat: {
         pattern: "*/30 * * * *",
-        limit: 1,
       },
     }
   );
