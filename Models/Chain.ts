@@ -17,6 +17,11 @@ const Chain = new Schema({
   id: { type: Number, required: true },
   Lastsyncupdated: { type: Number, required: true },
   stakers: [{ type: Stakers, required: false }],
+  totalstakers: {
+    type: Number,
+    required: false,
+    default: 0,
+  },
 });
 
 export const getChainModel = (chainId: number) => {
@@ -24,6 +29,6 @@ export const getChainModel = (chainId: number) => {
   return models[collectionName] || model(collectionName, Chain);
 };
 
-const MetadataSchemaDB = models.Stakersinfo || model("Chain", Chain);
+const MetadataSchemaDB = models.Chain || model("Chain", Chain);
 
 export default MetadataSchemaDB;

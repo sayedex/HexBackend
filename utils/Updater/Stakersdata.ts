@@ -11,7 +11,8 @@ export const updateStakersdata = async (id: number) => {
     updateCount++
   ) {
     const bulkOps: any = [];
-    const chainModel = getChainModel(id);
+    const chainModel:any = getChainModel(id);
+    
     const lastSync = await chainModel.findOne({ id: id });
 
     if (lastSync) {
@@ -33,18 +34,26 @@ export const updateStakersdata = async (id: number) => {
           const stakersToPush: any = uniqueData.filter(
             (staker) => !existingStakerAddresses.has(staker.stakerAddr)
           );
+          const numberOfExistingStakers = existingStakerAddresses.size;
+   
+          const totalStakers = numberOfExistingStakers + stakersToPush.length;
+        
+          
+        
           if (stakersToPush.length > 0) {
+        
             bulkOps.push({
               updateOne: {
                 filter: { id: id },
                 update: {
                   $push: { stakers: { $each: stakersToPush } },
                   $inc: { Lastsyncupdated: lastSyncID },
+                  $set: { totalstakers: totalStakers },
+
                 },
                 upsert: true,
               },
             });
-
             await chainModel.bulkWrite(bulkOps);
           }
 

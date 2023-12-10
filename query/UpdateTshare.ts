@@ -20,7 +20,7 @@ export const myWorker = new Worker(
   async (job) => {
     try {
       ChainId.map(async(e)=>{
-       await updateGlobalData(e)
+      await updateGlobalData(e)
       })
     } catch (erros) {
       console.log("error in myWorker", erros);
@@ -49,7 +49,7 @@ export const HexDaydataworker: any = new Worker(
     try {
   
       ChainId.map(async(e)=>{
-       await fetchAndupdatedDaydata(e)
+      await fetchAndupdatedDaydata(e)
       })
     } catch (erros) {
       console.log("error in myWorker", erros);
@@ -87,7 +87,7 @@ export const UpdateTsharechart = async () => {
     { color: "bird" },
     {
       repeat: {
-        every: 1000,
+        pattern: "0 */6 * * *",
         limit:1
       
       },
@@ -100,7 +100,7 @@ export const UpdateTsharechart = async () => {
     { color: "bird" },
     {
       repeat: {
-        every: 1000,
+        pattern: "0 */6 * * *",
         limit: 1,
       },
     }
@@ -111,7 +111,7 @@ export const UpdateTsharechart = async () => {
     { color: "bird" },
     {
       repeat: {
-        every: 1000,
+        pattern: "*/30 * * * *",
         limit: 1,
       },
     }
@@ -121,7 +121,7 @@ export const UpdateTsharechart = async () => {
     { color: "bird" },
     {
       repeat: {
-        every: 1000,
+        pattern: "*/30 * * * *",
         limit: 1,
       },
     }

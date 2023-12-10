@@ -36,17 +36,17 @@ export const getTest = catchAsyncErrors(
 
   //   newGlobaldata.save()
 
-  //   const newGlobaldata1 = new globalschema({
-  //     name: "pls",
-  //     id: 109, // Example ID
-  //     LastupdateidETH: 0, // Initial value for Lastsyncupdated
-  //     globaldata: [], // Empty array for Stakers
-  //     pricedata: [], // Initial value for un
-  //     daydata:[]
+//      const newGlobaldata1 = new globalschema({
+//       name: "pls",
+//       id: 369, // Example ID
+//       LastupdateidETH: 0, // Initial value for Lastsyncupdated
+//      globaldata: [], // Empty array for Stakers
+//       pricedata: [], // Initial value for un
+//       daydata:[]
 
-  // });
+//  });
 
-  // newGlobaldata1.save()
+//   newGlobaldata1.save()
 
 //      const initialData = {
 //       name: "pluseX",
@@ -68,12 +68,12 @@ export const getTest = catchAsyncErrors(
 //  await Stakersinfo.updateOne({ id: 1 }, initialDataA, { upsert: true });
 
 
-// const chainModel = getChainModel(109);
+// const chainModel = getChainModel(369);
 
-// // Find or create an empty Chain document for the given chain ID
-// const lastSync = await chainModel.findOneAndUpdate(
-//   { id: 109},
-//   { $setOnInsert: { id: 109, stakers: [], Lastsyncupdated: 0 } },
+// // // Find or create an empty Chain document for the given chain ID
+//  const lastSync = await chainModel.findOneAndUpdate(
+//    { id: 369},
+//   { $setOnInsert: { id: 369, stakers: [], Lastsyncupdated: 0 } },
 //   { upsert: true, new: true }
 // );
 
@@ -226,28 +226,50 @@ export const TshareUSDprice = catchAsyncErrors(
   }
 );
 
+// const chainModel = getChainModel(idNumber);
+// //811109
+
+// const filter = { id: id };
+// const update = { $set: { Lastsyncupdated: 701101 } };
+
+// // Assuming newSyncValue is the updated value for Lastsyncupdated
+// // If you want to increment the existing value, you can use $inc instead of $set
+
+// //const result = await chainModel.updateOne(filter, update);
+
+// const chainDocument = await chainModel.findOne({ id }, { Lastsyncupdated: 1 });
+// console.log(chainDocument);
+
+
 export const Totalstekrs = catchAsyncErrors(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
+    const idNumber:any = Number(id)
 
     const CachedCheck = await RedisClient.get(`Totalstekrs:${id}`);
-
     if (CachedCheck) {
       res.status(200).json({
         success: true,
         message: "Data retrieved successfully from Redis",
-        data: { totalstakers: JSON.parse(CachedCheck) },
+        data: JSON.parse(CachedCheck),
       });
     } else {
-      const chainModel = getChainModel(109);
   
-      const chainDocument = await chainModel.findOne({ id });
-      const stakersCount = chainDocument.stakers.length;
+      const chainModel = getChainModel(idNumber);
+  
+      const chainDocument = await chainModel.findOne({ id }, { totalstakers: 1 ,Lastsyncupdated:1});
+      const stakersCount = chainDocument.totalstakers;
+      const stakerCount = chainDocument.Lastsyncupdated;
+      const data = {
+        totalstakers: stakersCount ,
+        totalstake:stakerCount
+      }
+
 
 
       RedisClient.set(
         `Totalstekrs:${id}`,
-        JSON.stringify(stakersCount),
+        JSON.stringify(data),
         "EX",
         60
       );
@@ -255,7 +277,7 @@ export const Totalstekrs = catchAsyncErrors(
       res.status(200).json({
         success: true,
         message: "Data retrieved successfully from API",
-        data: { totalstakers: stakersCount },
+        data: data,
       });
     }
   }

@@ -26,7 +26,8 @@ export const getStakedata = catchAsyncErrors(
       userAddress,
       TokendataClient[Number(id)]
     );
-
+  
+    
     //0xa7633f37FEEfaCAc8F251b914e92Ff03d2acf0f2
 
     // global state
@@ -79,6 +80,7 @@ export const getStakedata = catchAsyncErrors(
       let yieldPenalty = 0;
       let isEnded = false;
       let endedDay = 0;
+      let daycount = 0;
 
       // is big day?
       let HasBigPayDay = false;
@@ -99,6 +101,8 @@ export const getStakedata = catchAsyncErrors(
       // amount staked
       const StakeAmount = stakedHearts / 10 ** 8;
       endedDay = endDay;
+   
+      // 1468 > 1490 ? 1490
 
       for (
         let day = Number(startDay);
@@ -106,6 +110,8 @@ export const getStakedata = catchAsyncErrors(
         (currentHexday > Number(endDay) ? Number(endDay) : currentHexday);
         day++
       ) {
+    
+        
         //get day data
         const { payoutPerTShare, payout } = Daydata[day];
 
@@ -119,6 +125,7 @@ export const getStakedata = catchAsyncErrors(
         }
 
         Yield += rewardDaily;
+        daycount +=1;
 
         // if there is big pay day
         if (day == 354) {
@@ -130,7 +137,7 @@ export const getStakedata = catchAsyncErrors(
       daysLive =
         Number(endDay) <= currentHexday
           ? Number(stakedDays)
-          : currentHexday - Number(startDay);
+          :daycount;
 
       // end
 

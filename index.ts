@@ -29,6 +29,8 @@ var whitelist = [
   "http://localhost:3000",
   "https://cipherem.xyz",
   "http://localhost:5000/api",
+  "https://hex-crypto.vercel.app",
+  "https://beta.hexcrypto.com"
 ];
 
 var corsOptions = {
@@ -44,8 +46,8 @@ var corsOptions = {
 
 app.use(express.json());
 app.use(cookieParser());
-app.use("/api/global", Router)
-
+app.use("/api/global",cors(corsOptions), Router)
+app.use("/api/public", Router)
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   const errorStatus = err.status || 500;
@@ -57,8 +59,7 @@ app.listen(5000, async () => {
   connect().then((e)=>{
     if(e.isdone){
       console.log("connet to db");
-      
-     UpdateTsharechart();
+      UpdateTsharechart();
     }
 
  })
