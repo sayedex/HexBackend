@@ -130,7 +130,7 @@ export const HexpriceChartdata = catchAsyncErrors(
           `Hexprice:${id}`,
           JSON.stringify(data.pricedata),
           "EX",
-          10000
+          21600
         );
 
         res.status(200).json({
@@ -168,7 +168,7 @@ export const payoutPerTShare = catchAsyncErrors(
           `payoutPerTShare:${id}`,
           JSON.stringify(data.daydata),
           "EX",
-          10000
+          21600
         );
 
         res.status(200).json({
@@ -207,7 +207,7 @@ export const TshareUSDprice = catchAsyncErrors(
           `Tsharedata:${id}`,
           JSON.stringify(Tshare.TshareDataETH),
           "EX",
-          60
+          21600
         );
 
         res.status(200).json({
@@ -271,7 +271,7 @@ export const Totalstekrs = catchAsyncErrors(
         `Totalstekrs:${id}`,
         JSON.stringify(data),
         "EX",
-        60
+        1800
       );
 
       res.status(200).json({
@@ -316,7 +316,7 @@ export const Daydatahistory = catchAsyncErrors(
         `Daydatahistory:${id}`,
         JSON.stringify(data.uniqueStakerAddresses),
         "EX",
-        60
+        1800
       );
 
       res.status(200).json({

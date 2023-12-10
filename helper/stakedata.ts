@@ -4,7 +4,7 @@ import { request, gql } from "graphql-request";
 const STAKE_INFO = gql`
   query Stakeinfo($stakerAddr: Bytes!) {
     stakeStarts: stakeStarts(
-      first: 100
+      first: 1000
       orderBy: timestamp
       orderDirection: asc
       subgraphError: allow
@@ -21,7 +21,7 @@ const STAKE_INFO = gql`
       endDay
     }
     stakeEnds: stakeEnds(
-      first: 100
+      first: 1000
       orderBy: timestamp
       orderDirection: asc
       subgraphError: allow

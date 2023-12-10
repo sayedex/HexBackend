@@ -81,6 +81,7 @@ export const getStakedata = catchAsyncErrors(
       let isEnded = false;
       let endedDay = 0;
       let daycount = 0;
+  
 
       // is big day?
       let HasBigPayDay = false;
@@ -191,6 +192,7 @@ export const getStakedata = catchAsyncErrors(
         potentialPenalty,
         yieldPenalty,
         isEnded,
+        idNumber:indx,
       };
     });
 
