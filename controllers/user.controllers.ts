@@ -296,6 +296,8 @@ export const getStakeinfo = catchAsyncErrors(
       }
     });
 
+    TotalProfit +=Staked;
+
     AverageStakeL =( totalStakeLength / stakeCount) / 365;
 
     res.status(200).json({

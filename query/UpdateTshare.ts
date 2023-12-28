@@ -6,12 +6,15 @@ const ThshareQueue = new Queue("UpdateTshare");
 const HexpriceQueue = new Queue("HexpriceQueue");
 const HexDaydata = new Queue("HexDaydata");
 const updateALLStakers = new Queue("updateALLStakers");
+const updateFeeddata = new Queue("updateFeeddata");
 
 //helper func
 import {updateGlobalData} from "../utils/Updater/updateGlobalData";
 import {fetchAndupdateHexprice} from "../utils/Updater/Priceupdater";
 import {fetchAndupdatedDaydata} from "../utils/Updater/Daydataupdater";
-import {updateStakersdata} from "../utils/Updater/Stakersdata"
+import {updateStakersdata} from "../utils/Updater/Stakersdata";
+import {fetchAndupdateFeedData} from "../utils/Updater/feedUpdater"
+
 
 import globalschema from "../Models/GlobalInfo";
 
@@ -73,6 +76,20 @@ export const updateALLStakersWorker: any = new Worker(
   { connection }
 );
 
+export const updateFeeddataworker: any = new Worker(
+  "updateFeeddata",
+  async (job) => {
+    try {
+  
+      ChainId.map(async(e)=>{
+       await fetchAndupdateFeedData(e)
+      })
+    } catch (erros) {
+      console.log("error in myWorker", erros);
+    }
+  },
+  { connection }
+);
 
 
 
@@ -122,4 +139,14 @@ export const UpdateTsharechart = async () => {
       },
     }
   );
+  await updateFeeddata.add(
+    "updateFeeddata",
+    { color: "bird" },
+    {
+      repeat: {
+        pattern: "*/15 * * * *",
+      },
+    }
+  );
+
 };

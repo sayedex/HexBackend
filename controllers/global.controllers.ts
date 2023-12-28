@@ -8,6 +8,7 @@ import globalschema from "../Models/GlobalInfo";
 import { DataResults } from "../helper/daydata";
 import {fetchStakeAmount} from "../helper/payout"
 import { getChainModel } from "../Models/Chain";
+import { getFeedModel } from "../Models/Feed";
 import IORedis from "ioredis";
 const RedisClient = new IORedis();
 
@@ -15,6 +16,10 @@ const RedisClient = new IORedis();
 import { fetchALLStakedata } from "../helper/allstakedata";
 import { updateStakersdata } from "../utils/Updater/Stakersdata";
 import { DataResults as Globaldata } from "../helper/globaldata";
+import { useFetchedFeedDatas } from "../data/Feed/Feeddata";
+import {fetchTokenTransactions} from '../data/Feed/Helper/Tradedata'
+import {fetchAndupdateFeedData} from "../utils/Updater/feedUpdater"
+
 export const getTest = catchAsyncErrors(
   async (req: Request, res: Response, next: NextFunction) => {
     //  const GlobalData: any = await fetchTokenData("0x2b591e99afe9f32eaa6214f7b7629768c40eeb39",
@@ -68,14 +73,16 @@ export const getTest = catchAsyncErrors(
 //  await Stakersinfo.updateOne({ id: 1 }, initialDataA, { upsert: true });
 
 
-// const chainModel = getChainModel(369);
+// const chainModel = getFeedModel(369);
 
-// // // Find or create an empty Chain document for the given chain ID
-//  const lastSync = await chainModel.findOneAndUpdate(
-//    { id: 369},
-//   { $setOnInsert: { id: 369, stakers: [], Lastsyncupdated: 0 } },
-//   { upsert: true, new: true }
-// );
+// // // // Find or create an empty Chain document for the given chain ID
+//  const lastSync = await chainModel.findOneAndUpdate(   { id: 
+//   369},
+//   { $setOnInsert: { id: 369,
+//     stakers24h: 0, totalStaked24h: 0 } },
+//    { upsert: true, new: true }
+//  );
+// ;
 
 
 
@@ -103,10 +110,16 @@ export const getTest = catchAsyncErrors(
     //     (Number(value) * Number(globaldata[i]?.shareRate)) / 10;
     //   return { date: timestamp, hexday: Math.ceil(i), tshare: tshareprice };
     // });
+  
+   // const resa  = await useFetchedFeedDatas("",1)
+
+   await fetchAndupdateFeedData(1)
+   
 
     res.status(200).json({
       success: true,
       message: "Products retrieved successfully",
+    
     });
   }
 );
@@ -244,7 +257,7 @@ export const TshareUSDprice = catchAsyncErrors(
 export const Totalstekrs = catchAsyncErrors(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
-    const idNumber:any = Number(id)
+    const idNumber:any = Number(id);
 
     const CachedCheck = await RedisClient.get(`Totalstekrs:${id}`);
     if (CachedCheck) {
@@ -297,21 +310,7 @@ export const Daydatahistory = catchAsyncErrors(
       });
     } else {
       const data = await globalschema.findOne({ id });
-      const daydata = data.daydata;
-      // make object to query easily
-      let Globaldaydata: Record<number, Globaldata["globalInfos"][0]> = {};
-      for (let i = 0; i < data.globaldata.length; i++) {
-        let item = data.globaldata[i];
-        let hexDay = item.hexDay;
-
-        if (!Globaldaydata.hasOwnProperty(hexDay)) {
-          Globaldaydata[hexDay] = item;
-        }
-      }
-
-     
-
-
+    
       RedisClient.set(
         `Daydatahistory:${id}`,
         JSON.stringify(data.uniqueStakerAddresses),
@@ -327,3 +326,39 @@ export const Daydatahistory = catchAsyncErrors(
     }
   }
 );
+
+
+export const Feedhistory = catchAsyncErrors(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const idNumber:any = Number(id);
+
+    const CachedCheck = await RedisClient.get(`Feedhistory:${id}`);
+
+    if (CachedCheck) {
+      res.status(200).json({
+        success: true,
+        message: "Data retrieved successfully from Redis",
+        data:  JSON.parse(CachedCheck),
+      });
+    } else {
+      const FeedModel:any = getFeedModel(idNumber);
+      const existingFeed = await FeedModel.findOne({ id: id });
+  
+    
+      RedisClient.set(
+        `Feedhistory:${id}`,
+        JSON.stringify(existingFeed),
+        "EX",
+        1800
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Data retrieved successfully from API",
+        data: existingFeed,
+      });
+    }
+  }
+);
+
