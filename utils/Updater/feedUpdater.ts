@@ -37,6 +37,8 @@ export const fetchAndupdateFeedData = async (id: number) => {
       existingFeed.netBuySell = netBuySell;
     }
 
+    console.log("feed data updated");
+    
     // Save the updated document
     await existingFeed.save();
   }

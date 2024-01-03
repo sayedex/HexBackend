@@ -27,10 +27,11 @@ const connect = async () => {
 
 var whitelist = [
   "http://localhost:3000",
-  "https://cipherem.xyz",
   "http://localhost:5000/api",
   "https://hex-crypto.vercel.app",
-  "https://beta.hexcrypto.com"
+  "https://beta.hexcrypto.com",
+  "http://localhost:3000/",
+  "https://trustainew-main-master.vercel.app"
 ];
 
 var corsOptions = {
@@ -59,7 +60,7 @@ app.listen(5000, async () => {
   connect().then((e)=>{
     if(e.isdone){
       console.log("connet to db");
-     UpdateTsharechart();
+      UpdateTsharechart();
     }
 
  })

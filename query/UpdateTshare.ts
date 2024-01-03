@@ -144,7 +144,7 @@ export const UpdateTsharechart = async () => {
     { color: "bird" },
     {
       repeat: {
-        pattern: "*/15 * * * *",
+        pattern: "*/30 * * * *",
       },
     }
   );

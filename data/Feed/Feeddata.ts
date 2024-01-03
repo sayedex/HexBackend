@@ -31,12 +31,11 @@ interface transation {
   penalty?: string;
   user: string;
   earlyDay?: string;
-  stakedDays?:string
+  stakedDays?: string;
+  grpdata?: transation[] | any; // Change to non-optional array
 }
 
-export async function useFetchedFeedDatas(
-  networkID: number
-): Promise<Data> {
+export async function useFetchedFeedDatas(networkID: number): Promise<Data> {
   let data: Data = {
     stakers24h: 0,
     totalStaked24h: 0,
@@ -45,7 +44,7 @@ export async function useFetchedFeedDatas(
   try {
     // get blocks from historic timestamps
     const [t24, t48, tWeek] = useDeltaTimestamps();
-    
+
     const Stakedata = await fetchALLStakedata(networkID, t24.toString());
     const StakeEnddata = await fetchALLEnddata(networkID, t24.toString());
     const TransferData = await fetchTransfer(networkID, t24.toString());
@@ -57,7 +56,33 @@ export async function useFetchedFeedDatas(
     );
     data.totalStaked24h = totalStaked;
     data.stakers24h = stakedata.length;
-    data.transation = allData;
+    //  data.transation = allData;
+    const userGroups: { [key: string]: transation } = {};
+
+    allData.forEach((transaction) => {
+      const { user } = transaction;
+
+      // If the user is not in the mapping, create a new group
+      if (!userGroups[user]) {
+        userGroups[user] = {
+          ...transaction,
+          grpdata: [], // Initialize grpdata as an array with the current transaction
+        };
+      } else {
+        userGroups[user].grpdata.push(transaction);
+      }
+    });
+
+    for (const user in userGroups) {
+      if (Object.prototype.hasOwnProperty.call(userGroups, user)) {
+        const userTransaction = userGroups[user];
+        userGroups[user].grpdata = userTransaction.grpdata.slice(0, 2); // Keep only the first two transactions
+      }
+    }
+
+    const groupedTransactions = Object.values(userGroups);
+    data.transation = groupedTransactions;
+
     return data;
   } catch {
     return data;
@@ -98,7 +123,7 @@ function calculateStaked(data: stakeStarts["stakeStarts"] | undefined): {
 
   if (data && data.length > 0) {
     stakedata = data.map((stake, indx) => {
-      const { timestamp, stakerAddr ,stakedDays} = stake;
+      const { timestamp, stakerAddr, stakedDays } = stake;
       const stakeAmount = Number(stake.stakedHearts) / 10 ** 8;
       totalStaked += stakeAmount;
       return {
@@ -106,7 +131,7 @@ function calculateStaked(data: stakeStarts["stakeStarts"] | undefined): {
         type: transation_type.STAKE,
         timestamp: timestamp.toString(),
         user: stakerAddr,
-        stakedDays:stakedDays.toString()
+        stakedDays: stakedDays.toString(),
       };
     });
   }
@@ -129,7 +154,6 @@ function calculateEndStake(data: stakeEnds["stakeEnds"] | undefined): {
         servedDays,
         stakedHearts,
         daysEarly,
-      
       } = data;
       const stakeAmount = Number(stakedHearts) / 10 ** 8;
       const earlyStake = Number(daysEarly) == 0;
@@ -139,11 +163,10 @@ function calculateEndStake(data: stakeEnds["stakeEnds"] | undefined): {
         type: earlyStake ? transation_type.UNSTAKE : transation_type.EARLY,
         timestamp: timestamp.toString(),
         user: stakerAddr,
-        payout: (Number(payout)/10**8).toString(),
-        penalty: (Number(penalty)/10**8).toString(),
+        payout: (Number(payout) / 10 ** 8).toString(),
+        penalty: (Number(penalty) / 10 ** 8).toString(),
         earlyDay: daysEarly,
-        servedDays:servedDays.toString()
-      
+        servedDays: servedDays.toString(),
       };
     });
   }

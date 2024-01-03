@@ -19,6 +19,7 @@ interface Transaction {
   earlyDay?: string;
   stakedDays?: string;
   servedDays?:string
+  grpdata?: any[]; // Change to non-optional array
 }
 
 interface DataDocument extends Document {
@@ -42,9 +43,9 @@ const transactionSchema = new Schema<Transaction>({
   penalty: { type: String },
   user: { type: String, required: true },
   earlyDay: { type: String },
-
   stakedDays: { type: String },
   servedDays: { type: String },
+  grpdata:{type:Array}
 });
 
 const FeedSchema = new Schema<DataDocument>({

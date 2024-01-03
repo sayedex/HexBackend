@@ -100,6 +100,10 @@ const GLOBAL_TRANSACTIONS_PLX = gql`
       }
 
       from
+      amount0In
+      amount1In
+      amount0Out
+      amount1Out
       amountUSD
     }
     swapsAs1: swaps(
@@ -125,6 +129,10 @@ const GLOBAL_TRANSACTIONS_PLX = gql`
         }
       }
 
+      amount0In
+      amount1In
+      amount0Out
+      amount1Out
       amountUSD
     }
   }
@@ -149,6 +157,10 @@ interface TransactionResults {
     origin: string;
     amount0: string;
     amount1: string;
+    amount0In:string
+    amount1In:string
+    amount0Out:string
+    amount1Out:string
     amountUSD: string;
   }[];
   swapsAs1: {
@@ -218,6 +230,7 @@ export async function fetchTokenTransactions(id: number, address: string) {
             (transactionData && transactionData.swapsAs0.length > 0) ||
             transactionData.swapsAs1.length > 0
           ) {
+             
             console.log("swapsAs0skip", swapsAs0skip);
             console.log("swapsAs1skip", swapsAs1skip);
             swapsAs0 = swapsAs0.concat(transactionData.swapsAs0);
@@ -265,8 +278,8 @@ export async function fetchTokenTransactions(id: number, address: string) {
           token0Address: id == 1 ? m.pool.token0.id : m.pair.token0.id ,
           token1Address:id == 1 ? m.pool.token1.id : m.pair.token1.id,
           amountUSD: parseFloat(m.amountUSD),
-          amountToken0: parseFloat(m.amount0),
-          amountToken1: parseFloat(m.amount1),
+          amountToken0:id == 1 ? parseFloat(m.amount0):parseFloat(m.amount0In) - parseFloat(m.amount0Out),
+          amountToken1: id == 1 ?parseFloat(m.amount1):parseFloat(m.amount1In) - parseFloat(m.amount1Out),
         }
       })
   
@@ -279,8 +292,8 @@ export async function fetchTokenTransactions(id: number, address: string) {
           token0Address: id == 1 ? m.pool.token0.id : m.pair.token0.id ,
           token1Address:id == 1 ? m.pool.token1.id : m.pair.token1.id,
           amountUSD: parseFloat(m.amountUSD),
-          amountToken0: parseFloat(m.amount0),
-          amountToken1: parseFloat(m.amount1),
+          amountToken0:id == 1 ? parseFloat(m.amount0):parseFloat(m.amount0In) - parseFloat(m.amount0Out),
+          amountToken1: id == 1 ?parseFloat(m.amount1):parseFloat(m.amount1In) - parseFloat(m.amount1Out),
         }
       })
 
@@ -290,7 +303,7 @@ export async function fetchTokenTransactions(id: number, address: string) {
     return {
       data: data,
       totalRecords,
-      error: false,
+      error: false
     };
   } catch (e) {
     // Handle errors

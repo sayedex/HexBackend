@@ -1,9 +1,12 @@
 import express from "express";
-import { getTest,TshareUSDprice,HexpriceChartdata,payoutPerTShare,Totalstekrs ,Feedhistory } from "../controllers/global.controllers";
+import { getTest,TshareUSDprice,HexpriceChartdata,payoutPerTShare,Totalstekrs ,Feedhistory,PriceHistoryTest } from "../controllers/global.controllers";
 import { getStakedata ,getStakeinfo} from "../controllers/user.controllers";
 
 const router = express.Router();
 router.get("/getTest",getTest);
+router.get("/priceHistoryTest",PriceHistoryTest);
+
+
 
 router.get("/tsharedata/:id",TshareUSDprice);
 router.get("/HexpriceChartdata/:id",HexpriceChartdata)
